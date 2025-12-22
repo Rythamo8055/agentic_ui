@@ -1,21 +1,26 @@
-// Copyright 2025 Agentic UI
-// A Flutter GenUI sample app with Google Generative AI
+// Agentic UI - Learning App with Firebase AI and Forui
+// A Flutter GenUI app for personalized learning
 
 import 'dart:async';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:forui/forui.dart';
 import 'package:genui/genui.dart';
-import 'package:genui_google_generative_ai/genui_google_generative_ai.dart';
+import 'package:genui_firebase_ai/genui_firebase_ai.dart';
 import 'package:logging/logging.dart';
+
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Load environment variables
-  await dotenv.load(fileName: ".env");
-  
-  // Configure logging
+
+  // Initialize Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // Configure GenUI logging
   configureGenUiLogging(level: Level.ALL);
 
   runApp(const AgenticUiApp());
@@ -29,21 +34,31 @@ class AgenticUiApp extends StatelessWidget {
     return MaterialApp(
       title: 'Agentic UI',
       debugShowCheckedModeBanner: false,
+      // Forui localization support
+      supportedLocales: FLocalizations.supportedLocales,
+      localizationsDelegates: FLocalizations.localizationsDelegates,
+      // Material theme with Forui colors
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF6750A4),
+          seedColor: const Color(0xFF18181B), // zinc-900
           brightness: Brightness.light,
         ),
         useMaterial3: true,
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF6750A4),
+          seedColor: const Color(0xFF18181B),
           brightness: Brightness.dark,
         ),
         useMaterial3: true,
       ),
       themeMode: ThemeMode.system,
+      builder: (context, child) => FTheme(
+        data: Theme.of(context).brightness == Brightness.dark
+            ? FThemes.zinc.dark
+            : FThemes.zinc.light,
+        child: child!,
+      ),
       home: const ChatScreen(),
     );
   }
@@ -73,22 +88,17 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _initializeGenUI() {
     try {
-      final String? apiKey = dotenv.env['GEMINI_API_KEY'];
-      if (apiKey == null || apiKey.isEmpty || apiKey == 'your_api_key_here') {
-        setState(() {
-          _errorMessage = 'Please set your GEMINI_API_KEY in the .env file.\n'
-              'Get your API key from: https://aistudio.google.com/apikey';
-        });
-        return;
-      }
-
       final Catalog catalog = CoreCatalogItems.asCatalog();
       _a2uiMessageProcessor = A2uiMessageProcessor(catalogs: [catalog]);
 
-      const systemInstruction = '''You are a helpful assistant who chats with a user,
-giving exactly one response for each user message.
-Your responses should contain acknowledgment of the user message.
-You can use interactive UI elements to make your responses more engaging.
+      const systemInstruction = '''You are a helpful learning assistant who helps users learn new topics.
+You can create interactive UI elements to make learning more engaging.
+
+When users ask to learn something:
+1. Break down the topic into digestible chunks
+2. Use interactive elements like buttons, cards, and lists
+3. Provide quizzes and exercises when appropriate
+4. Give encouraging feedback
 
 IMPORTANT: When you generate UI in a response, you MUST always create
 a new surface with a unique `surfaceId`. Do NOT reuse or update
@@ -96,11 +106,9 @@ existing `surfaceId`s. Each UI response must be in its own new surface.
 
 ${GenUiPromptFragments.basicChat}''';
 
-      final contentGenerator = GoogleGenerativeAiContentGenerator(
+      final contentGenerator = FirebaseAiContentGenerator(
         catalog: catalog,
         systemInstruction: systemInstruction,
-        apiKey: apiKey,
-        modelName: 'models/gemini-2.5-flash',
       );
 
       _genUiConversation = GenUiConversation(
@@ -130,7 +138,7 @@ ${GenUiPromptFragments.basicChat}''';
       });
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to initialize GenUI: $e';
+        _errorMessage = 'Failed to initialize: $e';
       });
     }
   }
@@ -160,7 +168,7 @@ ${GenUiPromptFragments.basicChat}''';
   void _sendMessage() {
     final String text = _textController.text.trim();
     if (text.isEmpty) return;
-    
+
     _textController.clear();
 
     setState(() {
@@ -199,14 +207,11 @@ ${GenUiPromptFragments.basicChat}''';
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
+    final theme = Theme.of(context);
+
     if (_errorMessage != null) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Agentic UI'),
-          backgroundColor: colorScheme.primaryContainer,
-        ),
+        appBar: AppBar(title: const Text('Agentic UI')),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24.0),
@@ -216,29 +221,27 @@ ${GenUiPromptFragments.basicChat}''';
                 Icon(
                   Icons.warning_amber_rounded,
                   size: 64,
-                  color: colorScheme.error,
+                  color: theme.colorScheme.error,
                 ),
                 const SizedBox(height: 16),
                 Text(
                   'Configuration Required',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                  style: theme.textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   _errorMessage!,
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 24),
-                FilledButton.icon(
-                  onPressed: () {
+                FButton(
+                  onPress: () {
                     setState(() {
                       _errorMessage = null;
                     });
                     _initializeGenUI();
                   },
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Retry'),
+                  child: const Text('Retry'),
                 ),
               ],
             ),
@@ -247,149 +250,121 @@ ${GenUiPromptFragments.basicChat}''';
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Agentic UI'),
-        backgroundColor: colorScheme.primaryContainer,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: () {
-              showAboutDialog(
-                context: context,
-                applicationName: 'Agentic UI',
-                applicationVersion: '1.0.0',
-                applicationLegalese: 'A Flutter GenUI sample app with Google Generative AI',
+    return FScaffold(
+      header: const FHeader(title: Text('Agentic UI - Learning Assistant')),
+      child: Column(
+        children: [
+          // Messages List
+          Expanded(
+            child: _messages.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          FIcons.messageCircle,
+                          size: 64,
+                          color: theme.colorScheme.outline,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Start Learning',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: theme.colorScheme.outline,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Ask me to teach you something!',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.outline,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    controller: _scrollController,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    itemCount: _messages.length,
+                    itemBuilder: (context, index) {
+                      final message = _messages[index];
+                      return _buildMessageBubble(message, theme);
+                    },
+                  ),
+          ),
+
+          // Loading Indicator
+          ValueListenableBuilder(
+            valueListenable: _genUiConversation.isProcessing,
+            builder: (_, isProcessing, _) {
+              if (!isProcessing) return const SizedBox.shrink();
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Thinking...',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.outline,
+                      ),
+                    ),
+                  ],
+                ),
               );
             },
           ),
+
+          // Input Area with Forui components
+          FDivider(),
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _textController,
+                    decoration: InputDecoration(
+                      hintText: 'Ask me anything...',
+                      filled: true,
+                      fillColor: theme.colorScheme.surfaceContainerHighest,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                    ),
+                    onSubmitted: (_) => _sendMessage(),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                FButton.icon(
+                  onPress: _sendMessage,
+                  child: const Icon(FIcons.send),
+                ),
+              ],
+            ),
+          ),
         ],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Messages List
-            Expanded(
-              child: _messages.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.chat_bubble_outline,
-                            size: 64,
-                            color: colorScheme.outline,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Start a conversation',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: colorScheme.outline,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Type a message to begin chatting with AI',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: colorScheme.outline,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : ListView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      itemCount: _messages.length,
-                      itemBuilder: (context, index) {
-                        final message = _messages[index];
-                        return _buildMessageBubble(message);
-                      },
-                    ),
-            ),
-
-            // Loading Indicator
-            ValueListenableBuilder(
-              valueListenable: _genUiConversation.isProcessing,
-              builder: (_, isProcessing, _) {
-                if (!isProcessing) return const SizedBox.shrink();
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: colorScheme.primary,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        'AI is thinking...',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colorScheme.outline,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-
-            // Input Area
-            Container(
-              decoration: BoxDecoration(
-                color: colorScheme.surface,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.all(12.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _textController,
-                      decoration: InputDecoration(
-                        hintText: 'Type your message...',
-                        filled: true,
-                        fillColor: colorScheme.surfaceContainerHighest,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24),
-                          borderSide: BorderSide.none,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 12,
-                        ),
-                      ),
-                      onSubmitted: (_) => _sendMessage(),
-                      textInputAction: TextInputAction.send,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton.filled(
-                    onPressed: _sendMessage,
-                    icon: const Icon(Icons.send),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
 
-  Widget _buildMessageBubble(ChatMessageItem message) {
-    final colorScheme = Theme.of(context).colorScheme;
+  Widget _buildMessageBubble(ChatMessageItem message, ThemeData theme) {
     final isUser = message.isUser;
 
     return Align(
@@ -399,12 +374,7 @@ ${GenUiPromptFragments.basicChat}''';
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width * 0.8,
         ),
-        child: Card(
-          color: isUser ? colorScheme.primaryContainer : colorScheme.surfaceContainerHighest,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
+        child: FCard(
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: message.surfaceId != null
@@ -412,14 +382,7 @@ ${GenUiPromptFragments.basicChat}''';
                     surfaceId: message.surfaceId!,
                     host: _genUiConversation.host,
                   )
-                : Text(
-                    message.text ?? '',
-                    style: TextStyle(
-                      color: isUser
-                          ? colorScheme.onPrimaryContainer
-                          : colorScheme.onSurfaceVariant,
-                    ),
-                  ),
+                : Text(message.text ?? ''),
           ),
         ),
       ),
