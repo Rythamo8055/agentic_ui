@@ -57,12 +57,10 @@ app.*.map.json
 .env.production
 *.env
 
-# Firebase configuration with API keys
-# NOTE: google-services.json and GoogleService-Info.plist contain API keys
-# Uncomment these if you want to keep them private:
-# android/app/google-services.json
-# ios/Runner/GoogleService-Info.plist
-# lib/firebase_options.dart
+# Firebase configuration with API keys (CONTAINS SECRETS!)
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+lib/firebase_options.dart
 
 # Google Cloud credentials
 *.json.enc

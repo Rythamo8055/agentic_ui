@@ -1,0 +1,37 @@
+{
+  "_comment": "============================================",
+  "_instructions": [
+    "🔐 GOOGLE SERVICES TEMPLATE",
+    "1. Copy this file to google-services.json",
+    "2. Download your actual config from Firebase Console:",
+    "   https://console.firebase.google.com/",
+    "3. Or run: flutterfire configure"
+  ],
+  "project_info": {
+    "project_number": "YOUR_PROJECT_NUMBER",
+    "project_id": "your-project-id",
+    "storage_bucket": "your-project-id.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:YOUR_PROJECT_NUMBER:android:YOUR_APP_HASH",
+        "android_client_info": {
+          "package_name": "com.yourcompany.yourapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "YOUR_ANDROID_API_KEY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
