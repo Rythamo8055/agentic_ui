@@ -42,6 +42,19 @@ class _LiveApiScreenState extends ConsumerState<LiveApiScreen> {
   bool _audioStreamIsActive = false; // Session is running with audio I/O active
   bool _cameraIsActive = false; // Whether sending video stream to Gemini
 
+  String _selectedVoice = 'fenrir'; // 'fenrir' (Male) or 'aoede' (Female)
+
+  void _toggleVoice() {
+    setState(() {
+      _selectedVoice = (_selectedVoice == 'fenrir') ? 'aoede' : 'fenrir';
+    });
+    if (_audioStreamIsActive) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Voice preference updated. Restart session to apply.')),
+      );
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -74,7 +87,7 @@ class _LiveApiScreenState extends ConsumerState<LiveApiScreen> {
         _settingUpLiveSession = true;
     });
     
-    await _liveService.connect(history: history);
+    await _liveService.connect(history: history, voiceName: _selectedVoice);
     
      setState(() {
       _settingUpLiveSession = false;
@@ -170,7 +183,7 @@ class _LiveApiScreenState extends ConsumerState<LiveApiScreen> {
       _settingUpLiveSession = true;
     });
 
-    await _liveService.connect();
+    await _liveService.connect(voiceName: _selectedVoice);
     
     setState(() {
       _settingUpLiveSession = false;
@@ -325,6 +338,10 @@ class _LiveApiScreenState extends ConsumerState<LiveApiScreen> {
               onPressed: toggleVideoStream,
             ),
             const Spacer(),
+            VoiceSwitchButton(
+              isMale: _selectedVoice == 'fenrir',
+              onPressed: _toggleVoice,
+            ),
             MuteButton(
               isMuted: _audioInput.isPaused,
               onPressed: _audioStreamIsActive ? toggleMuteInput : null,

@@ -127,3 +127,26 @@ class CallButton extends StatelessWidget {
     );
   }
 }
+class VoiceSwitchButton extends StatelessWidget {
+  const VoiceSwitchButton({required this.isMale, this.onPressed, super.key});
+
+  final bool isMale;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(4),
+      child: IconButton.filledTonal(
+        style: IconButton.styleFrom(
+            backgroundColor: AppColors.lavender,
+            shape: AppStyle.cardShape,
+            foregroundColor: Colors.black87),
+        onPressed: onPressed,
+        icon: Padding(
+            padding: const EdgeInsets.all(4),
+            child: Icon(isMale ? Icons.male : Icons.female)),
+      ),
+    );
+  }
+}

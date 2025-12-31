@@ -91,18 +91,19 @@ class LiveVoicePeerService {
     return finalInstruction;
   }
 
-  Future<void> connect({List<ConversationMessage>? history}) async {
+  Future<void> connect({List<ConversationMessage>? history, String? voiceName}) async {
     if (_liveSessionIsOpen) return;
     try {
       log("Connecting to Live Voice Peer Session...");
       
       final finalInstruction = generateSystemInstruction(history);
+      final selectedVoice = voiceName ?? 'fenrir'; // Default to Fenrir (Male)
 
       _liveModel = FirebaseAI.googleAI().liveGenerativeModel(
         model: 'gemini-2.5-flash-native-audio-preview-12-2025',
         systemInstruction: Content.text(finalInstruction),
         liveGenerationConfig: LiveGenerationConfig(
-          speechConfig: SpeechConfig(voiceName: 'fenrir'),
+          speechConfig: SpeechConfig(voiceName: selectedVoice),
           responseModalities: [ResponseModalities.audio],
         ),
       );
