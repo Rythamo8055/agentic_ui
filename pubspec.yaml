@@ -24,7 +24,6 @@ dependencies:
   genui_google_generative_ai: ^0.6.0  # For Linux development
   
   # Forui - Beautiful UI components
-  forui: ^0.17.0
   
   # Utilities
   logging: ^1.3.0
@@ -36,13 +35,49 @@ dependencies:
   web_socket_channel: ^3.0.1
   audioplayers: ^6.1.0
   path_provider: ^2.1.5
+  
+  # State Management
+  flutter_riverpod: ^2.6.1
+  
+  # Enhanced Audio Playback
+  flutter_soloud: ^3.1.6
+  waveform_flutter: ^1.2.0
+  just_audio: ^0.9.42
+  
+  # Permissions
+  permission_handler: ^12.0.1
+  
+  # Loading Effects
+  shimmer: ^3.0.0
+
+  # Demo Dependencies (Added for Firebase AI Showcase)
+  camera: ^0.11.1
+  flutter_image_compress: ^2.4.0
+  flutter_animate: ^4.5.2
+  flutter_markdown: ^0.7.7+1
+  file_picker: ^10.2.1
+  thumbnailer: ^3.1.0
+  cross_file: ^0.3.4+2
+  mime: ^2.0.0
+  url_launcher: ^6.3.2
+  image_picker: ^1.1.2 # Explicitly adding as it was in demo
+
+  # Local Storage for Conversation History
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  golden_screenshot: ^9.1.2
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.13
+  mockito: ^5.4.4
 
 flutter:
   uses-material-design: true
   assets:
     - .env
+    - assets/gemini-logo.png
+    - assets/firebase-ai-logic.png

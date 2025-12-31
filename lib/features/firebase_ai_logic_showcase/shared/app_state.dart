@@ -13,13 +13,18 @@
 // limitations under the License.
 
 import 'package:flutter/material.dart';
-import '../features/live_voice_assistant/presentation/live_api_screen.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AudioDialogScreen extends StatelessWidget {
-  const AudioDialogScreen({super.key});
+class AppState extends ChangeNotifier {
+  Color appColor = Color.fromARGB(255, 0, 32, 46);
 
-  @override
-  Widget build(BuildContext context) {
-    return const LiveApiScreen();
+  String setAppColor(Color color) {
+    appColor = color;
+    notifyListeners();
+    return 'Color successfully changed to ${appColor.toString()}!';
   }
 }
+
+final appStateProvider = ChangeNotifierProvider<AppState>((ref) {
+  return AppState();
+});

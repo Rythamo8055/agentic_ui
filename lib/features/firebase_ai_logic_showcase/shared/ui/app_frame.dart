@@ -13,13 +13,19 @@
 // limitations under the License.
 
 import 'package:flutter/material.dart';
-import '../features/live_voice_assistant/presentation/live_api_screen.dart';
 
-class AudioDialogScreen extends StatelessWidget {
-  const AudioDialogScreen({super.key});
+class AppFrame extends StatelessWidget {
+  const AppFrame({required this.child, super.key});
+
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return const LiveApiScreen();
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints.loose(Size(900, double.infinity)),
+        child: child,
+      ),
+    );
   }
 }

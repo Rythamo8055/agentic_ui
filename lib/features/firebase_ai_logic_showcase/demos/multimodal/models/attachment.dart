@@ -12,14 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flutter/material.dart';
-import '../features/live_voice_assistant/presentation/live_api_screen.dart';
+import 'dart:typed_data';
 
-class AudioDialogScreen extends StatelessWidget {
-  const AudioDialogScreen({super.key});
+class Attachment {
+  String fileName;
+  String mimeType;
+  Uint8List fileBytes;
 
-  @override
-  Widget build(BuildContext context) {
-    return const LiveApiScreen();
-  }
+  Attachment({
+    required this.fileName,
+    required this.mimeType,
+    required this.fileBytes,
+  });
 }

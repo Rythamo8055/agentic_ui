@@ -13,13 +13,28 @@
 // limitations under the License.
 
 import 'package:flutter/material.dart';
-import '../features/live_voice_assistant/presentation/live_api_screen.dart';
+import 'package:waveform_flutter/waveform_flutter.dart';
+import 'sound_waves.dart';
 
-class AudioDialogScreen extends StatelessWidget {
-  const AudioDialogScreen({super.key});
+class AudioVisualizer extends StatelessWidget {
+  const AudioVisualizer({
+    super.key,
+    required this.audioStreamIsActive,
+    this.amplitudeStream,
+  });
+
+  final bool audioStreamIsActive;
+  final Stream<Amplitude>? amplitudeStream;
 
   @override
   Widget build(BuildContext context) {
-    return const LiveApiScreen();
+    return (audioStreamIsActive && amplitudeStream != null)
+        ? Expanded(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Soundwaves(amplitudeStream: amplitudeStream!),
+            ),
+          )
+        : const Spacer();
   }
 }

@@ -13,13 +13,28 @@
 // limitations under the License.
 
 import 'package:flutter/material.dart';
-import '../features/live_voice_assistant/presentation/live_api_screen.dart';
+import './message_bubble.dart';
+import './message_widget.dart';
 
-class AudioDialogScreen extends StatelessWidget {
-  const AudioDialogScreen({super.key});
+class MessageListView extends StatelessWidget {
+  final List<MessageData> messages;
+  final ScrollController scrollController;
+
+  const MessageListView({
+    super.key,
+    required this.messages,
+    required this.scrollController,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return const LiveApiScreen();
+    return ListView.builder(
+      controller: scrollController,
+      itemCount: messages.length,
+      itemBuilder: (context, idx) {
+        final message = messages[idx];
+        return MessageBubble(message: message);
+      },
+    );
   }
 }

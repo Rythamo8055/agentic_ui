@@ -11,15 +11,20 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 import 'package:flutter/material.dart';
-import '../features/live_voice_assistant/presentation/live_api_screen.dart';
 
-class AudioDialogScreen extends StatelessWidget {
-  const AudioDialogScreen({super.key});
+class LiveApiDemoAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const LiveApiDemoAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const LiveApiScreen();
+    return AppBar(
+      backgroundColor: Colors.transparent,
+      leadingWidth: 100,
+      title: const Text('Gemini Live API Demo'),
+    );
   }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

@@ -12,14 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flutter/material.dart';
-import '../features/live_voice_assistant/presentation/live_api_screen.dart';
+/// A class to hold consistent spacing values for the application,
+/// following a 4dp grid.
+class AppSpacing {
+  /// 4.0
+  static const double s4 = 4.0;
 
-class AudioDialogScreen extends StatelessWidget {
-  const AudioDialogScreen({super.key});
+  /// 8.0
+  static const double s8 = 8.0;
 
-  @override
-  Widget build(BuildContext context) {
-    return const LiveApiScreen();
-  }
+  /// 16.0
+  static const double s16 = 16.0;
+
+  /// 24.0
+  static const double s24 = 24.0;
+
+  /// 48.0
+  static const double s48 = 48.0;
+
+  /// 60.0
+  static const double s60 = 60.0;
 }
